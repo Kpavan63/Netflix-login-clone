@@ -5,38 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card_animation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #232526, #414345); /* Modern gradient */
+            color: #f0f0f0; /* Light text color for contrast */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
         .card{
-            width: 308px;
-            border: 2px solid transparent;
-            border-radius: 12px;
-            margin:  80px auto;
-            height: 429px;
-            background:rgb(0, 0, 0);
+            width: 320px; /* Slightly wider */
+            border: none; /* Remove border, shadow will define edge */
+            border-radius: 15px; /* More modern radius */
+            margin:  40px auto; /* Adjusted margin for centering */
+            height: auto; /* Auto height based on content */
+            padding-bottom: 20px; /* Add some padding at the bottom */
+            background: rgba(0, 0, 0, 0.75); /* Slightly transparent dark color */
             text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); /* Lifted effect */
         }
         .icon{
             margin-top: 30px;
         }
         #title{
+            font-family: 'Roboto', sans-serif; /* Modern font */
+            color: #E50914; /* Netflix red */
+            font-size: 32px; /* Slightly larger */
+            margin-top: -10px; /* Adjust as needed */
+            margin-bottom: 20px; /* Add space below title */
+            cursor: pointer;
+            font-weight: 700; /* Bolder title */
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 40px); /* Adjust width considering padding */
+            padding: 12px 20px;
+            margin: 10px 0; /* Consistent margin */
+            border-radius: 8px; /* Modern radius */
+            border: 1px solid #555; /* Subtle border */
+            background: #333; /* Darker background */
+            color: #fff; /* White text */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #E50914; /* Netflix red on focus */
+            box-shadow: 0 0 5px rgba(229, 9, 20, 0.5); /* Glow effect */
+            outline: none; /* Remove default outline */
+        }
+        input[type="text"]::placeholder, input[type="password"]::placeholder {
+            color: #888; /* Lighter placeholder text */
+        }
+
+        input[type="submit"] {
+            width: calc(100% - 40px);
+            padding: 12px 20px;
+            margin-top: 20px; /* Space above button */
+            border-radius: 8px;
+            border: none;
+            background: #E50914; /* Netflix red */
             color: white;
-            font-size: 30px;
-            margin-top: -15px;
-            cursor: pointer; 
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-sizing: border-box;
         }
-        input{
-            margin-left: -1px;
-            padding: 8px 50px;
-            margin-top: -10px;
-            border-radius: 12px;
+        input[type="submit"]:hover {
+            background: #f6121D; /* Lighter red on hover */
         }
+
+        /* Styles for checkbox and links to ensure readability */
+        font[style="color: white;"], a[style="color: white; text-decoration:none"] {
+            color: #f0f0f0 !important; /* Ensure high contrast for these elements */
+        }
+        a[style="color: white; text-decoration:none"]:hover {
+            text-decoration: underline !important;
+        }
+
        svg{
         animation: fadeInUp;
         animation-duration: 2s;
        }
+       /* Error message style was already in the div, but can be centralized here */
+       #error-message {
+            /* color: #E50914; /* Using Netflix red for errors too */
+            /* margin-top: 15px; /* Space above error message */
+            /* font-weight: bold; */
+            min-height: 20px; /* Reserve space to prevent layout shift */
+       }
     </style>
 </head>
-<body>
+<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
     <div class="card">
         <div class="icon">
             <center>
@@ -51,11 +114,12 @@
            <br><br>
            <input type="password" name="Password" placeholder="Enter Your Password" required>
            <br><br>
-            <input type="Checkbox"><font style="color: white;">Accept privacy policy of Instagram [or] </font><a href="#" style="color: white; text-decoration:none">Register Now</a> <font style="color: white;">Join For More Updates</font>
+            <input type="Checkbox"><font style="color: white;">Accept privacy policy of [or] </font><a href="#" style="color: white; text-decoration:none">Register Now</a> <font style="color: white;">Join For More Updates</font>
         
             <br><br>
-            <input type="submit" value="Login Now" onclick="popup()">
+            <input type="submit" value="Login Now" onclick="handleLogin()">
         </form>
+        <div id="error-message" style="color: #E50914; margin-top: 15px; font-weight: bold; min-height: 20px;"></div>
     </div>
 
     <!-- Audio element -->
@@ -74,23 +138,68 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            // Attach event listener for animation start
             var svgElement = document.getElementById("animated-svg");
-            svgElement.addEventListener("animationstart", function(event) {
-                if (event.animationName === 'fadeInUp') {
-                    playAudioOnAnimationStart();
+            var emailInput = document.querySelector('input[name="email/name"]');
+            var passwordInput = document.querySelector('input[name="Password"]');
+            var errorMessageDiv = document.getElementById("error-message");
 
-                    // Start timer after 1 seconds (adjust as needed)
-                    startTimer(1000, function() {
-                        // Your timer callback function here
-                        console.log("Timer finished!");
-                    });
+            // Attach event listener for SVG animation start
+            if (svgElement) {
+                svgElement.addEventListener("animationstart", function(event) {
+                    if (event.animationName === 'fadeInUp') {
+                        playAudioOnAnimationStart();
+                        // Start timer after 1 seconds (adjust as needed)
+                        startTimer(1000, function() {
+                            console.log("Timer finished!");
+                        });
+                    }
+                });
+            }
+
+            // Function to clear error messages
+            function clearErrorMessage() {
+                if (errorMessageDiv) {
+                    errorMessageDiv.textContent = "";
                 }
-            });
+            }
+
+            // Add event listeners to input fields to clear error on input
+            if (emailInput) {
+                emailInput.addEventListener('input', clearErrorMessage);
+            }
+            if (passwordInput) {
+                passwordInput.addEventListener('input', clearErrorMessage);
+            }
         });
 
-        function popup(){
+        function popup(){ // This function seems unused now but kept for legacy if any other part uses it.
             window.alert("Netflix Login Error please Try Again");
+        }
+
+        function handleLogin() {
+            const emailInput = document.querySelector('input[name="email/name"]');
+            const passwordInput = document.querySelector('input[name="Password"]');
+            const errorMessageDiv = document.getElementById("error-message");
+
+            // Clear previous error messages
+            errorMessageDiv.textContent = "";
+
+            const emailValue = emailInput ? emailInput.value.trim() : "";
+            const passwordValue = passwordInput ? passwordInput.value.trim() : "";
+
+            if (emailValue === "") {
+                errorMessageDiv.textContent = "Email/Phone cannot be empty!";
+                return;
+            }
+
+            if (passwordValue === "") {
+                errorMessageDiv.textContent = "Password cannot be empty!";
+                return;
+            }
+
+            // If both fields have values, display the generic error (simulation)
+            // No need for setTimeout here unless simulating network latency for this specific message
+            errorMessageDiv.textContent = "Netflix Login Error please Try Again";
         }
     </script>
 </body>
